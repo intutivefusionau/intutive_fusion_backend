@@ -1,0 +1,21 @@
+{
+  "watch": [
+    "src",
+    "server.js",
+    "worker.js",
+    ".env"
+  ],
+  "ext": "js,json",
+  "ignore": [
+    "node_modules/",
+    "logs/",
+    "uploads/",
+    "__tests__/",
+    "*.test.js",
+    "coverage/"
+  ],
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "delay": 1000
+}
