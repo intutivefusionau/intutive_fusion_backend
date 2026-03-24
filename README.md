@@ -16,7 +16,12 @@ A production-ready Node.js backend API built with Express, Prisma, PostgreSQL, a
 - **ESLint & Prettier** - Code quality and formatting
 - **Security** - Helmet, CORS, Rate limiting built-in
 
-## 📋 Prerequisites
+## � Documentation
+
+- **[Docker Deployment Guide](DOCKER_DEPLOYMENT.md)** - Complete guide for production deployment
+- **[Development Guide](DEVELOPMENT.md)** - Local development setup and workflows
+
+## �📋 Prerequisites
 
 - Node.js >= 18.0.0
 - PostgreSQL >= 13
@@ -64,27 +69,30 @@ A production-ready Node.js backend API built with Express, Prisma, PostgreSQL, a
    npm start
    ```
 
-### Docker Development
+### Docker Deployment
 
-1. **Start all services**
-   ```bash
-   npm run docker:dev
-   ```
+**Quick Start:**
+```bash
+# Copy environment file
+cp .env.example .env
 
-2. **Run migrations in Docker**
-   ```bash
-   docker exec -it intutive_fusion_backend_dev npm run db:migrate
-   ```
+# Deploy all services (backend, PostgreSQL, Redis, Adminer)
+docker-compose up -d --build
 
-3. **View logs**
-   ```bash
-   npm run docker:logs
-   ```
+# Check status
+docker-compose ps
 
-4. **Stop services**
-   ```bash
-   npm run docker:dev:down
-   ```
+# View logs
+docker-compose logs -f
+```
+
+**Services Available:**
+- Backend API: http://localhost:5000
+- Adminer (DB Manager): http://localhost:8080
+- PostgreSQL: localhost:5432
+- Redis: localhost:6379
+
+📘 **For complete deployment guide, see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)**
 
 ## 📁 Project Structure
 
