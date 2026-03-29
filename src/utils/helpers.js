@@ -1,4 +1,5 @@
 const { PAGINATION } = require('./constants');
+const jwt = require('jsonwebtoken');
 
 /**
  * Standardized API response format
@@ -136,6 +137,13 @@ const maskString = (str, visibleChars = 4) => {
   return masked + str.slice(-visibleChars);
 };
 
+/**
+ * Generate JWT token
+ */
+const generateJwtToken = (payload, expiresIn = '7d') => {
+  return jwt.sign(payload, process.env.JWT_SECRET || 'default_jwt_secret', { expiresIn });
+}
+
 module.exports = {
   ApiResponse,
   parsePagination,
@@ -147,4 +155,5 @@ module.exports = {
   formatBytes,
   isValidEmail,
   maskString,
+  generateJwtToken
 };
