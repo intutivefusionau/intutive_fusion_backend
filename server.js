@@ -33,7 +33,7 @@ process.on('SIGINT', () => {
   });
 });
 
-const server = app.listen(5100, () => {
+const server = app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
   logger.info(`Health check: http://localhost:${PORT}/health`);
   logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
