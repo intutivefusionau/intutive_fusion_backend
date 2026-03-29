@@ -9,95 +9,108 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Enums
-enum UserRole {
-  ADMIN
-  USER
-  MODERATOR
-  GUEST
-}
-
-enum UserStatus {
-  ACTIVE
-  INACTIVE
-  SUSPENDED
-  DELETED
-}
-
-// Models
 model User {
-  id        String     @id @default(uuid())
-  email     String     @unique
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String   @unique
   password  String
-  firstName String?
-  lastName  String?
-  role      UserRole   @default(USER)
-  status    UserStatus @default(ACTIVE)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  lastLogin DateTime?
-
-  // Relations
-  sessions Session[]
-  logs     AuditLog[]
-
-  @@index([email])
-  @@index([status])
-  @@map("users")
-}
-
-model Session {
-  id           String   @id @default(uuid())
-  userId       String
-  token        String   @unique
-  refreshToken String?  @unique
-  ipAddress    String?
-  userAgent    String?
-  expiresAt    DateTime
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([token])
-  @@index([expiresAt])
-  @@map("sessions")
-}
-
-model AuditLog {
-  id        String   @id @default(uuid())
-  userId    String?
-  action    String
-  resource  String
-  details   Json?
-  ipAddress String?
-  userAgent String?
+  role      UserRole
   createdAt DateTime @default(now())
 
-  // Relations
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  patientProfile Patient?
+  doctorProfile  Doctor?
 
-  @@index([userId])
-  @@index([action])
-  @@index([createdAt])
-  @@map("audit_logs")
+  medicalOfficerCases Case[] @relation("MedicalOfficerRelation")
 }
 
-// Add your custom models below
-// Example:
-// model Product {
-//   id          String   @id @default(uuid())
-//   name        String
-//   description String?
-//   price       Decimal  @db.Decimal(10, 2)
-//   stock       Int      @default(0)
-//   isActive    Boolean  @default(true)
-//   createdAt   DateTime @default(now())
-//   updatedAt   DateTime @updatedAt
-//
-//   @@index([name])
-//   @@index([isActive])
-//   @@map("products")
-// }
+model Patient {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique
+  patientCode String   @unique
+  age         Int?
+  gender      String?
+  createdAt   DateTime @default(now())
+
+  user  User   @relation(fields: [userId], references: [id])
+  cases Case[]
+}
+
+model Doctor {
+  id             Int      @id @default(autoincrement())
+  userId         Int      @unique
+  specialization String?
+  createdAt      DateTime @default(now())
+
+  user  User   @relation(fields: [userId], references: [id])
+  cases Case[]
+}
+
+model Case {
+  id               Int        @id @default(autoincrement())
+  patientId        Int
+  doctorId         Int?
+  medicalOfficerId Int?
+  department       String?
+  visitType        VisitType?
+  reasonForVisit   String?
+  status           CaseStatus @default(NEW)
+  createdAt        DateTime   @default(now())
+  closedAt         DateTime?
+
+  patient        Patient @relation(fields: [patientId], references: [id])
+  doctor         Doctor? @relation(fields: [doctorId], references: [id])
+  medicalOfficer User?   @relation("MedicalOfficerRelation", fields: [medicalOfficerId], references: [id])
+
+  caseRecord CaseRecord?
+  files      File[]
+}
+
+model CaseRecord {
+  id               Int      @id @default(autoincrement())
+  caseId           Int      @unique
+  intakeTranscript String?  @db.Text
+  doctorTranscript String?  @db.Text
+  symptomsJson     Json?
+  aiDiagnosisJson  Json?
+  formsJson        Json?
+  doctorNotes      String?  @db.Text
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  case Case @relation(fields: [caseId], references: [id])
+}
+
+model File {
+  id        Int      @id @default(autoincrement())
+  caseId    Int
+  fileType  FileType
+  fileUrl   String
+  createdAt DateTime @default(now())
+
+  case Case @relation(fields: [caseId], references: [id])
+}
+
+enum UserRole {
+  PATIENT
+  DOCTOR
+  MEDICAL_OFFICER
+}
+
+enum VisitType {
+  OPD
+  FOLLOW_UP
+}
+
+enum CaseStatus {
+  NEW
+  INTAKE_STARTED
+  INTAKE_DONE
+  WAITING_DOCTOR
+  CONSULTATION_DONE
+  COMPLETED
+}
+
+enum FileType {
+  INTAKE_AUDIO
+  DOCTOR_AUDIO
+}
