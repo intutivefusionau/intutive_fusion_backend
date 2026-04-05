@@ -91,8 +91,8 @@ services:
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
       LOG_LEVEL: ${LOG_LEVEL:-info}
-    volumes:
-      # - ./logs:/app/logs
+    # volumes:
+    #   - ./logs:/app/logs
     depends_on:
       postgres:
         condition: service_healthy
