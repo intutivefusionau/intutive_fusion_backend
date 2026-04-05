@@ -29,7 +29,7 @@ router.post('/', authenticate, async (req, res) => {
     const payload = {
       userId: req.user.id,
       age: req.body.age,
-      gender: req.body.gender
+      gender: req.body.gender.toLowerCase()
     };
     const patient = await PatientService.createPatient(payload);
     res.json(patient);
@@ -46,6 +46,10 @@ router.get('/:id', authenticate, async (req, res) => {
   try {
 
     const patient = await PatientService.getPatientById(parseInt(req.params.id));
+
+    if (!patient) {
+      return res.status(404).json({ error: 'Patient not found' });
+    }
     
     if(req.user.role.toUpperCase() == UserRole.PATIENT && req.user.id !== patient.user.id) {
       return res.status(403).json({ error: 'Patients can only access their own profile' });
@@ -59,12 +63,16 @@ router.get('/:id', authenticate, async (req, res) => {
 
 /**
  * Get patient case history
- * GET /patients/:idcases
+ * GET /patients/:id/cases
  */
 router.get('/:id/cases', authenticate, async (req, res) => {
   try {
 
     const patient = await PatientService.getPatientById(parseInt(req.params.id));
+
+    if (!patient) {
+      return res.status(404).json({ error: 'Patient not found' });
+    }
     
     if(req.user.role.toUpperCase() == UserRole.PATIENT && req.user.id !== patient.user.id) {
       return res.status(403).json({ error: 'Patients can only access their own profile' });

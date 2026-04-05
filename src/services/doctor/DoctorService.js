@@ -27,6 +27,15 @@ class DoctorService {
   }
 
   /**
+   * Get doctor by UserId with user details
+   */
+  static async getDoctorByUserId(userId) {
+    return prisma.doctor.findUnique({
+      where: { userId },
+    });
+  }
+
+  /**
    * Get doctor queue (cases waiting for doctor)
    */
   static async getDoctorQueue(doctorId) {
@@ -36,7 +45,17 @@ class DoctorService {
         status: "WAITING_DOCTOR"
       },
       include: {
-        patient: { include: { user: true } }
+        patient: { 
+          include: { 
+            user:  {
+              select: {
+                id: true,
+                name: true,
+                phone: true
+              }
+            }
+          } 
+        }
       },
       orderBy: { createdAt: 'asc' }
     });

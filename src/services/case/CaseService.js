@@ -1,4 +1,5 @@
 const prisma = require('../../prisma/client');
+const { CaseStatus } = require('../../generated/prisma');
 
 /**
  * Handles case workflow
@@ -15,20 +16,47 @@ class CaseService {
         visitType: payload.visitType.toUpperCase(),
         reasonForVisit: payload.reasonForVisit,
         medicalOfficerId: payload.medicalOfficerId,
-        status: "NEW"
+        status: CaseStatus.NEW
       }
     });
   }
 
   /**
-   * Assign doctor to case
+   * Get all cases
    */
-  static async assignDoctor(caseId, doctorId) {
-    return prisma.case.update({
-      where: { id: caseId },
-      data: {
-        doctorId,
-        status: "WAITING_DOCTOR"
+  static async getAllCases(offset, limit) {
+    return prisma.case.findMany({
+      skip: offset,
+      take: limit,
+      orderBy: {
+        updatedAt: 'desc'
+      },
+      include: {
+        patient: { 
+          include: { 
+            user: {
+              select: {
+                id: true,
+                name: true,
+                phone: true
+              }
+            } 
+          } 
+        },
+        doctor: { 
+          include: { 
+            user: {
+              select: {
+                id: true,
+                name: true,
+                phone: true
+              }
+            } 
+          } 
+        },
+        medicalOfficer: true,
+        caseRecord: true,
+        files: true
       }
     });
   }
@@ -37,13 +65,21 @@ class CaseService {
    * Save MO intake details
    */
   static async saveIntake(caseId, payload) {
+
+    const updateData = {};
+    
+    if(payload.intakeTranscript) {
+      updateData.intakeTranscript = payload.intakeTranscript;
+    } 
+    if(payload.symptomsJson) {
+      updateData.symptomsJson = payload.symptomsJson;
+    }
+    if(payload.formsJson) {
+      updateData.formsJson = payload.formsJson;
+    }
     const record = await prisma.caseRecord.upsert({
       where: { caseId },
-      update: {
-        intakeTranscript: payload.intakeTranscript,
-        symptomsJson: payload.symptomsJson,
-        formsJson: payload.formsJson
-      },
+      update: updateData,
       create: {
         caseId,
         intakeTranscript: payload.intakeTranscript,
@@ -54,10 +90,23 @@ class CaseService {
 
     await prisma.case.update({
       where: { id: caseId },
-      data: { status: "INTAKE_DONE" }
+      data: { status: CaseStatus.INTAKE_DONE }
     });
 
     return record;
+  }
+
+  /**
+   * Assign doctor to case
+   */
+  static async assignDoctor(caseId, doctorId) {
+    return prisma.case.update({
+      where: { id: caseId },
+      data: {
+        doctorId,
+        status: CaseStatus.WAITING_DOCTOR
+      }
+    });
   }
 
   /**
@@ -81,7 +130,7 @@ class CaseService {
 
     await prisma.case.update({
       where: { id: caseId },
-      data: { status: "CONSULTATION_DONE" }
+      data: { status: CaseStatus.CONSULTATION_DONE }
     });
 
     return record;
@@ -94,9 +143,35 @@ class CaseService {
     return prisma.case.findUnique({
       where: { id: caseId },
       include: {
-        patient: { include: { user: true } },
-        doctor: { include: { user: true } },
-        medicalOfficer: true,
+        patient: { 
+          include: { 
+            user: {
+              select: {
+                id: true,
+                name: true,
+                phone: true
+              }
+            } 
+          } 
+        },
+        doctor: { 
+          include: { 
+            user: {
+              select: {
+                id: true,
+                name: true,
+                phone: true
+              }
+            } 
+          } 
+        },
+        medicalOfficer: {
+          select: {
+            id: true,
+            name: true,
+            phone: true
+          }
+        },
         caseRecord: true,
         files: true
       }

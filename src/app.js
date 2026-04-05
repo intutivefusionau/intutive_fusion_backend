@@ -16,6 +16,7 @@ const userRoutes = require('./routes/user.routes');
 const patientRoutes = require('./routes/patient.routes');
 const caseRoutes = require('./routes/case.routes');
 const doctorRoutes = require('./routes/doctor.routes');
+const receptionRoutes = require('./routes/reception.routes');
 const fileRoutes = require('./routes/file.routes');
 // const authRoutes = require('./routes/auth');
 
@@ -89,7 +90,8 @@ app.use('/api/health', healthRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/patients', patientRoutes);
 app.use('/api/v1/cases', caseRoutes);
-// app.use('/api/v1/doctors', doctorRoutes);
+app.use('/api/v1/doctors', doctorRoutes);
+app.use('/api/v1/reception', receptionRoutes);
 // app.use('/api/v1/files', fileRoutes);
 
 // API documentation endpoint
