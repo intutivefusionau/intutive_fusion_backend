@@ -1,4 +1,5 @@
 const prisma = require('../../prisma/client');
+const { CaseStatus } = require('../../generated/prisma');
 
 /**
  * Handles doctor profile operations
@@ -42,7 +43,7 @@ class DoctorService {
     return prisma.case.findMany({
       where: {
         doctorId,
-        status: "WAITING_DOCTOR"
+        status: CaseStatus.INTAKE_DONE
       },
       include: {
         patient: { 

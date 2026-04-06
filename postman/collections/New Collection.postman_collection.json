@@ -1,0 +1,554 @@
+{
+  "info": {
+    "_postman_id": "55838869-046d-4e7b-99c2-686cd605484c",
+    "name": "API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register: Doctor/MO",
+      "id": "84f4cf93-7233-445d-824f-70e1d9544631",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"Chirag\",\n    \"phone\": \"9716533053\",\n    \"role\": \"DOCTOR\",\n    \"password\" : \"testing\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{api_base_url}}/v1/users/register",
+          "host": [
+            "{{api_base_url}}"
+          ],
+          "path": [
+            "v1",
+            "users",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login: Doctor/MO",
+      "id": "fdba2979-fb8d-490a-8b63-4feb6b0d88dc",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"phone\":\"9716533051\",\n    \"password\": \"9716533051\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{api_base_url}}/v1/users/login",
+          "host": [
+            "{{api_base_url}}"
+          ],
+          "path": [
+            "v1",
+            "users",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Reception: Create OPD Request",
+      "id": "4fbebad7-43dd-490a-9d17-da7e1b8fee1a",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\" : \"Kiya\",\n    \"phone\" : \"9716533051\",\n    \"age\" : 30,\n    \"gender\": \"Male\",\n    \"department\": \"Cardiology\",\n    \"reasonForVisit\": \"experiencing chest pain, palpitations, shortness of breath, dizziness, or fainting\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{api_base_url}}/v1/reception/create-case",
+          "host": [
+            "{{api_base_url}}"
+          ],
+          "path": [
+            "v1",
+            "reception",
+            "create-case"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "(Nt Required)Get User",
+      "id": "66eea277-98f2-4eac-b4d9-84df3ae4bc26",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{auth_token_medical_officer}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{api_base_url}}/v1/users",
+          "host": [
+            "{{api_base_url}}"
+          ],
+          "path": [
+            "v1",
+            "users"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "(Nt Required)Get Patient Profile",
+      "id": "1534913b-b00c-46c9-8cd6-deb9d7dcb848",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{auth_token_patient}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{api_base_url}}/v1/patients/10",
+          "host": [
+            "{{api_base_url}}"
+          ],
+          "path": [
+            "v1",
+            "patients",
+            "10"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "(Nt Required)Get Patient Cases",
+      "id": "60d4fc42-0294-462a-8914-d5c7dce71861",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{auth_token_patient}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{api_base_url}}/v1/patients/10/cases",
+          "host": [
+            "{{api_base_url}}"
+          ],
+          "path": [
+            "v1",
+            "patients",
+            "10",
+            "cases"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Doctor Profile",
+      "id": "e1427c20-2f58-452b-911d-85c237ba6783",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{auth_token_doctor}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"specialization\" : \"cardiology\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{api_base_url}}/v1/doctors",
+          "host": [
+            "{{api_base_url}}"
+          ],
+          "path": [
+            "v1",
+            "doctors"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Doctor Profile",
+      "id": "425343de-0fc3-4829-b39b-15c917873ef0",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{auth_token_doctor}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"specialization\" : \"cardiology\"\n}"
+        },
+        "url": {
+          "raw": "{{api_base_url}}/v1/doctors/getProfile",
+          "host": [
+            "{{api_base_url}}"
+          ],
+          "path": [
+            "v1",
+            "doctors",
+            "getProfile"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "MO: Get All Cases",
+      "id": "cabb0b8f-5827-4f44-bc86-0771b36edad7",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{auth_token_medical_officer}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"doctorId\" : 4\n}"
+        },
+        "url": {
+          "raw": "{{api_base_url}}/v1/cases?page=1&limit=10",
+          "host": [
+            "{{api_base_url}}"
+          ],
+          "path": [
+            "v1",
+            "cases"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "1",
+              "uuid": "04ecca9f-8f56-40c3-9da0-ddd77a2b6560"
+            },
+            {
+              "key": "limit",
+              "value": "10",
+              "uuid": "4d91d4c3-7a54-40ec-b646-39159acbcb2d"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Case Details: Only Doctor/MO",
+      "id": "431ac63b-2a42-4ba8-ae71-3b0e435c9ff9",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{auth_token_medical_officer}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"doctorId\" : 4\n}"
+        },
+        "url": {
+          "raw": "{{api_base_url}}/v1/cases/9",
+          "host": [
+            "{{api_base_url}}"
+          ],
+          "path": [
+            "v1",
+            "cases",
+            "9"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "MO: Intake/AI Forms/Patient Forms",
+      "id": "b0afe2dd-2ad3-4060-b3e7-3f117980c7b8",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{auth_token_doctor}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"intakeTranscript\" : \"What has the last few weeks been like for you that drove you to set this appointment? Tell me what you've been noticing\",\n    \"symptomsJson\" : {\n        \"bodypain\" : \"high\"\n    },\n    \"formsJson\" : {}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{api_base_url}}/v1/cases/13/intake",
+          "host": [
+            "{{api_base_url}}"
+          ],
+          "path": [
+            "v1",
+            "cases",
+            "13",
+            "intake"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "MO: Assign Doctor",
+      "id": "3f646f6b-c009-40ca-87e0-201583b0d6c0",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{auth_token_medical_officer}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"doctorId\" : 4\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{api_base_url}}/v1/cases/13/assign-doctor",
+          "host": [
+            "{{api_base_url}}"
+          ],
+          "path": [
+            "v1",
+            "cases",
+            "13",
+            "assign-doctor"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Doctor: Get Queued Patient(Intake Done)",
+      "id": "268fea6e-ee7c-4f66-9772-0d32e37db16f",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{auth_token_doctor}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{api_base_url}}/v1/doctors/queue",
+          "host": [
+            "{{api_base_url}}"
+          ],
+          "path": [
+            "v1",
+            "doctors",
+            "queue"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Doctor: Consultation",
+      "id": "19c23639-bf76-4443-8804-1f01f1a493da",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{auth_token_doctor}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"doctorTranscript\" : \"details\",\n    \"aiDiagnosisJson\" : {\"desc\": \"details\"},\n    \"doctorNotes\" : \"test\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{api_base_url}}/v1/cases/13/consultation",
+          "host": [
+            "{{api_base_url}}"
+          ],
+          "path": [
+            "v1",
+            "cases",
+            "13",
+            "consultation"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "id": "3be8212c-74a8-4d7e-ba04-88a8254799c4",
+      "key": "api_base_url",
+      "value": ""
+    },
+    {
+      "id": "659319c4-cdb4-4dd5-8841-b60d152f97e2",
+      "key": "auth_token_doctor",
+      "value": ""
+    },
+    {
+      "id": "84911967-3438-4cbe-a588-6e48e59f086f",
+      "key": "auth_token_medical_officer",
+      "value": ""
+    },
+    {
+      "id": "17ac1461-6126-4c03-814b-a8a81b9e7e84",
+      "key": "auth_token_patient",
+      "value": ""
+    }
+  ]
+}

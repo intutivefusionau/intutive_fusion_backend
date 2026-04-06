@@ -10,33 +10,33 @@ const { UserRole } = require('../generated/prisma');
  * Create patient profile
  * POST /patients
  */
-router.post('/', authenticate, async (req, res) => {
-  try {
+// router.post('/', authenticate, async (req, res) => {
+//   try {
 
-    if(!req.body.age || !req.body.gender) {
-      return res.status(400).json({ error: 'Age and gender are required' });
-    }
+//     if(!req.body.age || !req.body.gender) {
+//       return res.status(400).json({ error: 'Age and gender are required' });
+//     }
 
-    if(!req.user.role || req.user.role.toUpperCase() !== UserRole.PATIENT) {
-      return res.status(403).json({ error: 'Only users with PATIENT role can create patient profiles' });
-    }
+//     if(!req.user.role || req.user.role.toUpperCase() !== UserRole.PATIENT) {
+//       return res.status(403).json({ error: 'Only users with PATIENT role can create patient profiles' });
+//     }
 
-    const checkIfPatientExists = await PatientService.getPatientByUserId(req.user.id);
-    if (checkIfPatientExists) {
-      return res.status(400).json({ error: 'Patient profile already exists for this user' });
-    }
+//     const checkIfPatientExists = await PatientService.getPatientByUserId(req.user.id);
+//     if (checkIfPatientExists) {
+//       return res.status(400).json({ error: 'Patient profile already exists for this user' });
+//     }
 
-    const payload = {
-      userId: req.user.id,
-      age: req.body.age,
-      gender: req.body.gender.toLowerCase()
-    };
-    const patient = await PatientService.createPatient(payload);
-    res.json(patient);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+//     const payload = {
+//       userId: req.user.id,
+//       age: req.body.age,
+//       gender: req.body.gender.toLowerCase()
+//     };
+//     const patient = await PatientService.createPatient(payload);
+//     res.json(patient);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// });
 
 /**
  * Get patient by ID

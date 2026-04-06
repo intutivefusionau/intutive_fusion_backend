@@ -12,42 +12,42 @@ const { CaseStatus } = require('../generated/prisma');
 /**
  * Create case
  */
-router.post('/', authenticate, async (req, res) => {
-  try {
+// router.post('/', authenticate, async (req, res) => {
+//   try {
 
-    if (!req.body.patientId || !req.body.department || !req.body.visitType || !req.body.reasonForVisit) {
-      return res.status(400).json({ error: 'patientId, department, visitType, and reasonForVisit are required' });
-    }
+//     if (!req.body.patientId || !req.body.department || !req.body.visitType || !req.body.reasonForVisit) {
+//       return res.status(400).json({ error: 'patientId, department, visitType, and reasonForVisit are required' });
+//     }
 
-    const checkIfPatientExists = await CaseService.checkIfPatientExists(req.body.patientId);
+//     const checkIfPatientExists = await CaseService.checkIfPatientExists(req.body.patientId);
 
-    if (!checkIfPatientExists) {
-      return res.status(400).json({ error: 'Patient does not exist' });
-    }
+//     if (!checkIfPatientExists) {
+//       return res.status(400).json({ error: 'Patient does not exist' });
+//     }
 
-    if(!VisitType.hasOwnProperty(req.body.visitType.toUpperCase())) {
-      const validVisitTypes = Object.keys(VisitType).join(', ');
-      return res.status(400).json({ error: `Visit type must be one of: ${validVisitTypes}` });
-    }
+//     if(!VisitType.hasOwnProperty(req.body.visitType.toUpperCase())) {
+//       const validVisitTypes = Object.keys(VisitType).join(', ');
+//       return res.status(400).json({ error: `Visit type must be one of: ${validVisitTypes}` });
+//     }
 
-    if(!req.user.role || req.user.role.toUpperCase() !== "MEDICAL_OFFICER") {
-      return res.status(403).json({ error: 'Only users with MEDICAL_OFFICER role can create cases' });
-    }
+//     if(!req.user.role || req.user.role.toUpperCase() !== "MEDICAL_OFFICER") {
+//       return res.status(403).json({ error: 'Only users with MEDICAL_OFFICER role can create cases' });
+//     }
 
-    const payload = {
-      patientId: req.body.patientId,
-      department: req.body.department,
-      visitType: req.body.visitType,
-      reasonForVisit: req.body.reasonForVisit,
-      medicalOfficerId: req.user.id
-    };
+//     const payload = {
+//       patientId: req.body.patientId,
+//       department: req.body.department,
+//       visitType: req.body.visitType,
+//       reasonForVisit: req.body.reasonForVisit,
+//       medicalOfficerId: req.user.id
+//     };
 
-    const data = await CaseService.createCase(payload);
-    res.json(data);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
+//     const data = await CaseService.createCase(payload);
+//     res.json(data);
+//   } catch (e) {
+//     res.status(500).json({ error: e.message });
+//   }
+// });
 
 /**
  * Get all cases 
@@ -77,8 +77,8 @@ router.get('/', authenticate, async (req, res) => {
 router.post('/:id/intake', authenticate, async (req, res) => {
   try {
 
-    if(!(req.user.role.toUpperCase() == UserRole.DOCTOR)) {
-      return res.status(403).json({ error: 'Only doctors can save intake information' });
+    if(!(req.user.role.toUpperCase() == UserRole.MEDICAL_OFFICER || req.user.role.toUpperCase() == UserRole.DOCTOR)) {
+      return res.status(403).json({ error: 'Only medical officers and doctors can save intake information' });
     }
 
     const payload = {
@@ -86,6 +86,15 @@ router.post('/:id/intake', authenticate, async (req, res) => {
       symptomsJson: req.body.symptomsJson ? req.body.symptomsJson : null,
       formsJson: req.body.formsJson ? req.body.formsJson : null
     };
+
+    const checkIfCaseExists = await CaseService.getCaseDetails(parseInt(req.params.id));
+    if (!checkIfCaseExists) {
+      return res.status(404).json({ error: 'Case not found' });
+    }
+
+    if(checkIfCaseExists.status != CaseStatus.WAITING_DOCTOR) {
+      return res.status(400).json({ error: 'Intake information can only be saved when case is in WAITING_DOCTOR status' });
+    }
 
     const data = await CaseService.saveIntake(
       parseInt(req.params.id),
@@ -157,7 +166,7 @@ router.post('/:id/consultation', authenticate, async (req, res) => {
       return res.status(404).json({ error: 'Case not found' });
     }
 
-    if(checkIfCaseExists.status != CaseStatus.WAITING_DOCTOR) {
+    if(checkIfCaseExists.status != CaseStatus.INTAKE_DONE) {
       return res.status(400).json({ error: 'Consultation can only be saved after doctor is assigned and intake is done' });
     }
     
