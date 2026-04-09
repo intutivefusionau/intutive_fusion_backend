@@ -12,13 +12,19 @@ const logger = require('./utils/logger');
 // Import routes
 const healthRoutes = require('./routes/health');
 // Add more routes here as needed
-// const userRoutes = require('./routes/users');
+const userRoutes = require('./routes/user.routes');
+const patientRoutes = require('./routes/patient.routes');
+const caseRoutes = require('./routes/case.routes');
+const doctorRoutes = require('./routes/doctor.routes');
+const receptionRoutes = require('./routes/reception.routes');
+const fileRoutes = require('./routes/file.routes');
 // const authRoutes = require('./routes/auth');
 
 const app = express();
 
 // Trust proxy - important for rate limiting and getting correct IPs
 app.set('trust proxy', 1);
+
 
 // Security middleware
 app.use(helmet({
@@ -81,7 +87,12 @@ app.use('/api/health', healthRoutes);
 
 // Add more API routes here
 // app.use('/api/auth', authRoutes);
-// app.use('/api/users', userRoutes);
+app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/patients', patientRoutes);
+app.use('/api/v1/cases', caseRoutes);
+app.use('/api/v1/doctors', doctorRoutes);
+app.use('/api/v1/reception', receptionRoutes);
+// app.use('/api/v1/files', fileRoutes);
 
 // API documentation endpoint
 app.get('/api/docs', (req, res) => {

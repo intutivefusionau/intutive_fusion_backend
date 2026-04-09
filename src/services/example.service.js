@@ -1,8 +1,4 @@
-const { PrismaClient } = require('../generated/prisma');
-const { ApiError } = require('../middleware/errorHandler');
-const logger = require('../utils/logger');
-
-const prisma = new PrismaClient();
+const prisma = require('../prisma/client');
 
 /**
  * Example Service

@@ -10,7 +10,7 @@ const authenticate = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new ApiError(401, 'No token provided');
+      return res.status(401).json({ error: 'Unauthorized Access'});
     }
 
     const token = authHeader.substring(7);
@@ -20,12 +20,14 @@ const authenticate = (req, res, next) => {
     next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
-      next(new ApiError(401, 'Token expired'));
+      console.error('Token expired');
     } else if (error.name === 'JsonWebTokenError') {
-      next(new ApiError(401, 'Invalid token'));
+      console.error(error.message);
     } else {
       next(error);
+      console.error('Authentication error:', error);
     }
+    return res.status(401).json({ error: 'Unauthorized Access' });
   }
 };
 
