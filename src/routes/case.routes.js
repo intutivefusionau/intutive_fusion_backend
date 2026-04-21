@@ -72,13 +72,17 @@ router.get('/', authenticate, async (req, res) => {
 });
 
 /**
- * Save intake
+ * Save intake (transcript, symptoms, forms)
+ * Can be called multiple times as case progresses
  */
 router.post('/:id/intake', authenticate, async (req, res) => {
   try {
 
-    if(!(req.user.role.toUpperCase() == UserRole.MEDICAL_OFFICER || req.user.role.toUpperCase() == UserRole.DOCTOR)) {
-      return res.status(403).json({ error: 'Only medical officers and doctors can save intake information' });
+    // Allow MO, Doctor, and Patient roles to update intake data
+    if(!(req.user.role.toUpperCase() == UserRole.MEDICAL_OFFICER || 
+         req.user.role.toUpperCase() == UserRole.DOCTOR ||
+         req.user.role.toUpperCase() == UserRole.PATIENT)) {
+      return res.status(403).json({ error: 'Only medical officers, doctors, and patients can save intake information' });
     }
 
     const payload = {
@@ -92,8 +96,10 @@ router.post('/:id/intake', authenticate, async (req, res) => {
       return res.status(404).json({ error: 'Case not found' });
     }
 
-    if(checkIfCaseExists.status != CaseStatus.WAITING_DOCTOR) {
-      return res.status(400).json({ error: 'Intake information can only be saved when case is in WAITING_DOCTOR status' });
+    // Allow saving intake data during appropriate statuses
+    const allowedStatuses = [CaseStatus.NEW, CaseStatus.INTAKE_STARTED, CaseStatus.INTAKE_DONE];
+    if(!allowedStatuses.includes(checkIfCaseExists.status)) {
+      return res.status(400).json({ error: `Intake information can only be saved when case is in ${allowedStatuses.join(', ')} status` });
     }
 
     const data = await CaseService.saveIntake(
@@ -108,6 +114,38 @@ router.post('/:id/intake', authenticate, async (req, res) => {
 
 
 
+
+/**
+ * Assign suggested forms to case
+ */
+router.post('/:id/assign-forms', authenticate, async (req, res) => {
+  try {
+
+    if(!(req.user.role.toUpperCase() == UserRole.MEDICAL_OFFICER)) {
+      return res.status(403).json({ error: 'Only medical officers can assign forms to cases' });
+    }
+
+    const { suggestedForms, aiFormReasoning } = req.body;
+
+    if(!suggestedForms || !Array.isArray(suggestedForms) || suggestedForms.length === 0) {
+      return res.status(400).json({ error: 'suggestedForms array is required' });
+    }
+
+    const checkIfCaseExists = await CaseService.getCaseDetails(parseInt(req.params.id));
+    if (!checkIfCaseExists) {
+      return res.status(404).json({ error: 'Case not found' });
+    }
+
+    const data = await CaseService.assignForms(
+      parseInt(req.params.id),
+      { suggestedForms, aiFormReasoning }
+    );
+    
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
 /**
  * Assign doctor
@@ -180,9 +218,14 @@ router.post('/:id/consultation', authenticate, async (req, res) => {
       return res.status(400).json({ error: 'At least one of doctorTranscript, aiDiagnosisJson or doctorNotes is required' });
     }  
 
+    // Get doctor ID from logged-in user
+    const doctor = await DoctorService.getDoctorByUserId(req.user.id);
+    const doctorId = doctor ? doctor.id : null;
+
     const data = await CaseService.saveConsultation(
       parseInt(req.params.id),
-      req.body
+      req.body,
+      doctorId
     );
     res.json(data);
   } catch (e) {
@@ -196,14 +239,116 @@ router.post('/:id/consultation', authenticate, async (req, res) => {
 router.get('/:id', authenticate, async (req, res) => {
   try {
 
-    if(!(req.user.role.toUpperCase() == UserRole.MEDICAL_OFFICER || req.user.role.toUpperCase() == UserRole.DOCTOR)) {
-      return res.status(403).json({ error: 'Only medical officers and doctors can access case details' });
+    if(!(req.user.role.toUpperCase() == UserRole.MEDICAL_OFFICER || 
+         req.user.role.toUpperCase() == UserRole.DOCTOR || 
+         req.user.role.toUpperCase() == UserRole.PATIENT)) {
+      return res.status(403).json({ error: 'Only medical officers, doctors, and patients can access case details' });
     }
 
     const data = await CaseService.getCaseDetails(
       parseInt(req.params.id)
     );
     res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+/**
+ * Get case details for patient forms (unauthenticated)
+ */
+router.get('/:id/patient-forms', async (req, res) => {
+  try {
+    const data = await CaseService.getCaseDetails(
+      parseInt(req.params.id)
+    );
+    
+    if (!data) {
+      return res.status(404).json({ error: 'Case not found' });
+    }
+
+    // Return only necessary data for patient forms
+    res.json({
+      id: data.id,
+      patientId: data.patientId,
+      patient: data.patient,
+      caseRecord: {
+        suggestedFormsJson: data.caseRecord?.suggestedFormsJson,
+        formsJson: data.caseRecord?.formsJson,
+      }
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+/**
+ * Submit patient form responses (unauthenticated)
+ */
+router.post('/:id/patient-forms', async (req, res) => {
+  try {
+    const { formsJson } = req.body;
+
+    if (!formsJson) {
+      return res.status(400).json({ error: 'formsJson is required' });
+    }
+
+    const checkIfCaseExists = await CaseService.getCaseDetails(parseInt(req.params.id));
+    if (!checkIfCaseExists) {
+      return res.status(404).json({ error: 'Case not found' });
+    }
+
+    // Allow form submission when forms are assigned
+    const allowedStatuses = [CaseStatus.INTAKE_STARTED, CaseStatus.INTAKE_DONE];
+    if(!allowedStatuses.includes(checkIfCaseExists.status)) {
+      return res.status(400).json({ error: 'Forms can only be submitted when they are assigned' });
+    }
+
+    const data = await CaseService.saveIntake(
+      parseInt(req.params.id),
+      { formsJson }
+    );
+    
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+/**
+ * Get prescription details (unauthenticated - public access for patients)
+ */
+router.get('/:id/prescription', async (req, res) => {
+  try {
+    const caseDetails = await CaseService.getCaseDetails(
+      parseInt(req.params.id)
+    );
+    
+    if (!caseDetails) {
+      return res.status(404).json({ error: 'Case not found' });
+    }
+
+    // Check if consultation data exists
+    if (!caseDetails.caseRecord?.aiDiagnosisJson) {
+      return res.status(404).json({ error: 'Prescription not yet generated' });
+    }
+
+    // Return prescription data
+    res.json({
+      id: caseDetails.id,
+      patientId: caseDetails.patientId,
+      department: caseDetails.department,
+      visitType: caseDetails.visitType,
+      status: caseDetails.status,
+      visitTimestamp: caseDetails.createdAt,
+      patient: caseDetails.patient,
+      doctor: caseDetails.doctor,
+      caseRecord: {
+        doctorTranscript: caseDetails.caseRecord?.doctorTranscript,
+        aiDiagnosisJson: caseDetails.caseRecord?.aiDiagnosisJson,
+        doctorNotes: caseDetails.caseRecord?.doctorNotes,
+      }
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

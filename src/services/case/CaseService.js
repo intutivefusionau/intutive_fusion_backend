@@ -97,6 +97,39 @@ class CaseService {
   }
 
   /**
+   * Assign suggested forms to case
+   */
+  static async assignForms(caseId, payload) {
+    const updateData = {
+      suggestedFormsJson: payload.suggestedForms
+    };
+    
+    if (payload.aiFormReasoning) {
+      // Store reasoning in caseSummary or a similar field if needed
+      updateData.caseSummary = payload.aiFormReasoning;
+    }
+
+    // Update case record with suggested forms
+    const record = await prisma.caseRecord.upsert({
+      where: { caseId },
+      update: updateData,
+      create: {
+        caseId,
+        suggestedFormsJson: payload.suggestedForms,
+        ...(payload.aiFormReasoning && { caseSummary: payload.aiFormReasoning })
+      }
+    });
+
+    // Update case status to INTAKE_STARTED to reflect forms have been assigned
+    await prisma.case.update({
+      where: { id: caseId },
+      data: { status: CaseStatus.INTAKE_STARTED }
+    });
+
+    return record;
+  }
+
+  /**
    * Assign doctor to case
    */
   static async assignDoctor(caseId, doctorId) {
@@ -112,7 +145,7 @@ class CaseService {
   /**
    * Save doctor consultation
    */
-  static async saveConsultation(caseId, payload) {
+  static async saveConsultation(caseId, payload, doctorId = null) {
     const record = await prisma.caseRecord.upsert({
       where: { caseId },
       update: {
@@ -128,9 +161,15 @@ class CaseService {
       }
     });
 
+    // Update case status and doctorId if provided
+    const updateData = { status: CaseStatus.CONSULTATION_DONE };
+    if (doctorId) {
+      updateData.doctorId = doctorId;
+    }
+    
     await prisma.case.update({
       where: { id: caseId },
-      data: { status: CaseStatus.CONSULTATION_DONE }
+      data: updateData
     });
 
     return record;

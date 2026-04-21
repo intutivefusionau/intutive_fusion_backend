@@ -10,17 +10,15 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  phone     String   @unique
-  password  String
-  role      UserRole
-  createdAt DateTime @default(now())
-
-  patientProfile Patient?
-  doctorProfile  Doctor?
-
-  medicalOfficerCases Case[] @relation("MedicalOfficerRelation")
+  id                  Int      @id @default(autoincrement())
+  name                String
+  phone               String   @unique
+  role                UserRole
+  createdAt           DateTime @default(now())
+  password            String
+  medicalOfficerCases Case[]   @relation("MedicalOfficerRelation")
+  doctorProfile       Doctor?
+  patientProfile      Patient?
 }
 
 model Patient {
@@ -30,9 +28,8 @@ model Patient {
   age         Int?
   gender      String?
   createdAt   DateTime @default(now())
-
-  user  User   @relation(fields: [userId], references: [id])
-  cases Case[]
+  cases       Case[]
+  user        User     @relation(fields: [userId], references: [id])
 }
 
 model Doctor {
@@ -40,47 +37,50 @@ model Doctor {
   userId         Int      @unique
   specialization String?
   createdAt      DateTime @default(now())
-
-  user  User   @relation(fields: [userId], references: [id])
-  cases Case[]
+  cases          Case[]
+  user           User     @relation(fields: [userId], references: [id])
 }
 
 model Case {
-  id               Int        @id @default(autoincrement())
+  id               Int         @id @default(autoincrement())
   patientId        Int
   doctorId         Int?
   medicalOfficerId Int?
   department       String?
   visitType        VisitType?
   reasonForVisit   String?
-  status           CaseStatus @default(NEW)
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt @default(now())
+  status           CaseStatus  @default(NEW)
+  createdAt        DateTime    @default(now())
   closedAt         DateTime?
+  updatedAt        DateTime    @default(now()) @updatedAt
+  doctor           Doctor?     @relation(fields: [doctorId], references: [id])
+  medicalOfficer   User?       @relation("MedicalOfficerRelation", fields: [medicalOfficerId], references: [id])
+  patient          Patient     @relation(fields: [patientId], references: [id])
+  caseRecord       CaseRecord?
+  files            File[]
 
-  patient        Patient @relation(fields: [patientId], references: [id])
-  doctor         Doctor? @relation(fields: [doctorId], references: [id])
-  medicalOfficer User?   @relation("MedicalOfficerRelation", fields: [medicalOfficerId], references: [id])
-
-  caseRecord CaseRecord?
-  files      File[]
-  
   @@index([updatedAt])
 }
 
 model CaseRecord {
-  id               Int      @id @default(autoincrement())
-  caseId           Int      @unique
-  intakeTranscript String?  @db.Text
-  doctorTranscript String?  @db.Text
-  symptomsJson     Json?
-  aiDiagnosisJson  Json?
-  formsJson        Json?
-  doctorNotes      String?  @db.Text
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  case Case @relation(fields: [caseId], references: [id])
+  id                           Int      @id @default(autoincrement())
+  caseId                       Int      @unique
+  intakeTranscript             String?
+  doctorTranscript             String?
+  symptomsJson                 Json?
+  aiDiagnosisJson              Json?
+  suggestedFormsJson           Json?
+  formsJson                    Json?
+  doctorNotes                  String?
+  createdAt                    DateTime @default(now())
+  updatedAt                    DateTime @updatedAt
+  caseSummary                  Json?
+  consultationJobName          String?
+  consultationTranscriptStatus String?
+  followUpQuestions            Json?
+  intakeJobName                String?
+  intakeTranscriptStatus       String?
+  case                         Case     @relation(fields: [caseId], references: [id])
 }
 
 model File {
@@ -89,14 +89,14 @@ model File {
   fileType  FileType
   fileUrl   String
   createdAt DateTime @default(now())
-
-  case Case @relation(fields: [caseId], references: [id])
+  case      Case     @relation(fields: [caseId], references: [id])
 }
 
 enum UserRole {
   PATIENT
   DOCTOR
   MEDICAL_OFFICER
+  RECEPTION
 }
 
 enum VisitType {

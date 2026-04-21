@@ -66,6 +66,102 @@ class PatientService {
       orderBy: { createdAt: 'desc' }
     });
   }
+
+  /**
+   * Get patient's medical history with diagnoses (for follow-up visits)
+   * Returns only completed cases with diagnosis information
+   */
+  static async getPatientMedicalHistory(patientId) {
+    return prisma.case.findMany({
+      where: { 
+        patientId,
+        status: { in: ['CONSULTATION_DONE', 'COMPLETED'] },
+        caseRecord: {
+          aiDiagnosisJson: { not: null }
+        }
+      },
+      include: {
+        doctor: { 
+          include: { 
+            user: {
+              select: {
+                id: true,
+                name: true,
+                phone: true
+              }
+            }
+          } 
+        },
+        caseRecord: {
+          select: {
+            aiDiagnosisJson: true,
+            doctorNotes: true,
+            caseSummary: true,
+            symptomsJson: true,
+            createdAt: true,
+            updatedAt: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
+
+  /**
+   * Search patients by name or phone
+   */
+  static async searchPatients(searchTerm) {
+    return prisma.patient.findMany({
+      where: {
+        user: {
+          OR: [
+            { name: { contains: searchTerm, mode: 'insensitive' } },
+            { phone: { contains: searchTerm } }
+          ]
+        }
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            role: true
+          }
+        },
+        cases: {
+          take: 1,
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            createdAt: true,
+            status: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 20
+    });
+  }
+
+  /**
+   * Get all patients (for MO/Doctor/Reception)
+   */
+  static async getAllPatients() {
+    return prisma.patient.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            role: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
 }
 
 module.exports = { PatientService };

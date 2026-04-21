@@ -1,11 +1,10 @@
-const { PrismaClient } = require('../generated/prisma');
+const { PrismaClient } = require('../src/generated/prisma');
 const bcrypt = require('bcryptjs');
-const logger = require('../utils/logger');
 
 const prisma = new PrismaClient();
 
 async function main() {
-  logger.info('🌱 Starting database seed...');
+  console.log('🌱 Starting database seed...');
 
   // Create Doctor account
   const doctorPassword = await bcrypt.hash('doctor123', 10);
@@ -24,7 +23,7 @@ async function main() {
       },
     },
   });
-  logger.info(`✅ Created Doctor: ${doctor.name} (${doctor.phone})`);
+  console.log('✅ Created Doctor:', doctor.name, `(${doctor.phone})`);
 
   // Create Medical Officer account
   const moPassword = await bcrypt.hash('mo123', 10);
@@ -38,7 +37,7 @@ async function main() {
       role: 'MEDICAL_OFFICER',
     },
   });
-  logger.info(`✅ Created Medical Officer: ${medicalOfficer.name} (${medicalOfficer.phone})`);
+  console.log('✅ Created Medical Officer:', medicalOfficer.name, `(${medicalOfficer.phone})`);
 
   // Create Reception account
   const receptionPassword = await bcrypt.hash('reception123', 10);
@@ -52,7 +51,7 @@ async function main() {
       role: 'RECEPTION',
     },
   });
-  logger.info(`✅ Created Reception: ${reception.name} (${reception.phone})`);
+  console.log('✅ Created Reception:', reception.name, `(${reception.phone})`);
 
   // Create Patient account
   const patientPassword = await bcrypt.hash('patient123', 10);
@@ -73,25 +72,24 @@ async function main() {
       },
     },
   });
-  logger.info(`✅ Created Patient: ${patientUser.name} (${patientUser.phone})`);
+  console.log('✅ Created Patient:', patientUser.name, `(${patientUser.phone})`);
 
-  logger.info('\n🎉 Seed completed successfully!');
-  logger.info('\n📋 Login Credentials:');
-  logger.info('─────────────────────────────────────────────────');
-  logger.info('Doctor:         9000000001 / doctor123');
-  logger.info('Medical Officer: 9000000002 / mo123');
-  logger.info('Reception:      9000000003 / reception123');
-  logger.info('Patient:        9000000004 / patient123');
-  logger.info('─────────────────────────────────────────────────');
-  logger.info('\n⚠️  Remember to change passwords in production!');
+  console.log('\n🎉 Seed completed successfully!');
+  console.log('\n📋 Login Credentials:');
+  console.log('─────────────────────────────────────────────────');
+  console.log('Doctor:         9000000001 / doctor123');
+  console.log('Medical Officer: 9000000002 / mo123');
+  console.log('Reception:      9000000003 / reception123');
+  console.log('Patient:        9000000004 / patient123');
+  console.log('─────────────────────────────────────────────────');
+  console.log('\n⚠️  Remember to change passwords in production!');
 }
 
 main()
   .catch((e) => {
-    logger.error('❌ Seed failed:', e);
+    console.error('❌ Seed failed:', e);
     process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
   });
-

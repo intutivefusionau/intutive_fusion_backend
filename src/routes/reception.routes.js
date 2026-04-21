@@ -26,7 +26,8 @@ router.post('/create-case', async (req, res) => {
       age: req.body.age,
       gender: req.body.gender,
       reasonForVisit: req.body.reasonForVisit,
-      visitType: VisitType.OPD, // default to OPD for reception created cases
+      visitType: req.body.visitType || VisitType.OPD, // default to OPD if not provided
+      department: req.body.department || null,
     };
     
 
@@ -50,14 +51,27 @@ router.post('/create-case', async (req, res) => {
 
     const casePayload = {
       patientId: patient.id,
-      department: req.body.department ? req.body.department : null,
+      department: payload.department,
       visitType: payload.visitType,
       reasonForVisit: payload.reasonForVisit
     };
 
     const data = await CaseService.createCase(casePayload);
 
-    res.json(data);
+    res.json({
+      success: true,
+      case: data,
+      patient: {
+        id: patient.id,
+        user: {
+          id: user.id,
+          name: user.name,
+          phone: user.phone,
+          age: payload.age,
+          gender: payload.gender,
+        }
+      }
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
