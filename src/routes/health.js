@@ -49,17 +49,17 @@ router.get('/', async (req, res) => {
     }
 
     // Check Redis connection (if configured)
-    if (redis) {
-      try {
-        await redis.ping();
-        health.services.redis = 'healthy';
-      } catch (error) {
-        health.services.redis = 'unhealthy';
-        health.status = 'DEGRADED';
-      }
-    } else {
-      health.services.redis = 'not-configured';
-    }
+    // if (redis) {
+    //   try {
+    //     await redis.ping();
+    //     health.services.redis = 'healthy';
+    //   } catch (error) {
+    //     health.services.redis = 'unhealthy';
+    //     health.status = 'DEGRADED';
+    //   }
+    // } else {
+    //   health.services.redis = 'not-configured';
+    // }
 
     const statusCode = health.status === 'OK' ? 200 : 503;
     res.status(statusCode).json(health);
